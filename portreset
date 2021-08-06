@@ -1,0 +1,5 @@
+#!/bin/bash
+ portnumber=$(lsof -i:5000 -t)
+ echo $portnumber
+ kill -9 $portnumber
+ 
