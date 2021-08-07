@@ -4,13 +4,9 @@ import _, { values } from 'lodash';
 import { Link } from 'react-router-dom';
 
 import SurveyField from './SurveyField';
+import validateEmails from '../../utils/validateEmails';
+import formFields from './formFields';
 
-const FIELDS =  [
-    { label: 'Survey Title', name: 'title' },
-    { label: 'Subject Line', name: 'subject' },
-    { label: ' Email Body', name: 'body'},
-    { label: 'Recipient List', name: 'emails'}
-];
 
 class SurveyForm extends React.Component {
     // renderFieldOld() {
@@ -25,20 +21,20 @@ class SurveyForm extends React.Component {
     //     );
     // }
     renderFields() {
-        return  _.map(FIELDS, ({ label, name }) => { 
+        return  _.map(formFields, ({ label, name }) => { 
             return <Field key={name}  component={SurveyField} type="text" label={label} name={name} />
         })
     }
     render() {
         return (
             <div>
-                <form onSubmit={this.props.handleSubmit(values => {})}>
+                <form onSubmit={this.props.handleSubmit(this.props.onSurveySubmit)}>
                     {this.renderFields()}
                     <Link to="/surveys" className="red btn-flat white-text">
                         Cancel
                     </Link>
                     <button className="teal btn-flat right white-text">
-                        Next 
+                         Next 
                         <i className="material-icons right">done</i>
                     </button>
                 </form>
@@ -48,7 +44,7 @@ class SurveyForm extends React.Component {
 }
 
 const validate1 = (values) => { //same value as handleSubmit() callback argument
-    const errors = FIELDS.reduce((res, cur) =>{
+    const errors = formFields.reduce((res, cur) =>{
         //console.log(res);
         var curVal = cur.name;
         console.log(curVal);
@@ -61,7 +57,7 @@ const validate1 = (values) => { //same value as handleSubmit() callback argument
 }
 
 const validate2 = (values) => { //same value as handleSubmit() callback argument
-    const errors = _.reduce(FIELDS, (res, cur) =>{
+    const errors = _.reduce(formFields, (res, cur) =>{
         var curVal = cur.name;
         console.log(curVal);
             res[curVal] = `${curVal} cannot be empty !`
@@ -73,15 +69,19 @@ const validate2 = (values) => { //same value as handleSubmit() callback argument
 
 const validate = values => {
     const errors = {};
-    _.each(FIELDS, ({name}) => {
+    errors.emails = validateEmails(values.emails || '');
+
+    _.each(formFields, ({name}) => {
         if(!values[name]) {
             errors[name] = `${name} cannot be empty !`
         }
     });
+
     return errors;
 }
 
 export default reduxForm({
     form: 'surveyForm',
-    validate: validate
+    validate: validate,
+    destroyOnUnmount: false
 })(SurveyForm); 
