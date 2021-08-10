@@ -9,17 +9,6 @@ import formFields from './formFields';
 
 
 class SurveyForm extends React.Component {
-    // renderFieldOld() {
-    //     return (
-    //         <div>
-    //             {/* <Field type="text" name="surveyTitle" component={SurveyField} label="inputLabel"/> */}
-    //             <Field label="Survey Title" type="text" name="title" component={SurveyField} />
-    //             <Field label="Subject Line" type="text" name="subject" component={SurveyField} />
-    //             <Field label="Email Body" type="text" name="body" component={SurveyField} />
-    //             <Field label="Recipient List" type="text" name="emails" component={SurveyField} />
-    //         </div>
-    //     );
-    // }
     renderFields() {
         return  _.map(formFields, ({ label, name }) => { 
             return <Field key={name}  component={SurveyField} type="text" label={label} name={name} />
@@ -69,7 +58,7 @@ const validate2 = (values) => { //same value as handleSubmit() callback argument
 
 const validate = values => {
     const errors = {};
-    errors.emails = validateEmails(values.emails || '');
+    errors.recipients = validateEmails(values.recipients || '');
 
     _.each(formFields, ({name}) => {
         if(!values[name]) {
