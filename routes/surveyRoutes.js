@@ -12,10 +12,16 @@ const testAsync = require('../services/testService');
 const Survey = mongoose.model('surveys');
 
 module.exports = app => {
-    app.get('/api/surveys/thanks/yes', (req, res) => {
+    app.get('/api/surveys', requireLogin, async (req, res) => {
+        const surveys = await Survey.find({ _user: req.user.id })
+            .select({ recipients: false });        
+        res.send(surveys); 
+    });
+
+    app.get('/api/surveys/:surveyId/thanks/yes', (req, res) => {
         res.send('Thanks for voting. Appreciating your love!');
     });
-    app.get('/api/surveys/thanks/no', (req, res) => {
+    app.get('/api/surveys/:surveyId/thanks/no', (req, res) => {
         res.send('Thanks for voting. We will improve our service!');
     });
 
@@ -47,7 +53,20 @@ module.exports = app => {
             })
             .compact()
             .uniqBy('email', 'surveyId')
+            .each(event => {
+                Survey.updateOne({
+                    _id: event.surveyId,
+                    recipients: {
+                        $elemMatch: { email: event.email, responded: false }
+                    }
+                }, {
+                    $inc: {[event.choice]: 1},
+                    $set: { 'recipients.$.responded': true },
+                    lastResponded: new Date()
+                }).exec();
+            })
             .value();
+
         console.log(events);
         res.send("received");
     })
